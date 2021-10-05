@@ -1,0 +1,55 @@
+version: 0.2
+ 
+env:
+  variables:
+    TF_VERSION: "0.12.28"
+ 
+phases:
+  install:
+    commands:
+      - cd /usr/bin
+      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - unzip -o terraform.zip
+ 
+  build:
+    commands:
+      - curl -kvvv https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud || true
+      - cd "$CODEBUILD_SRC_DIR"
+      - sed -i "s/cluster_name/$TF_VAR_cluster_name/g" _terraform.tf
+      
+      - sed -i "s/var_argo_url/argocd.$TF_VAR_cluster_name.gks.vodafone.com/g" charts/argocd/values.yaml
+      - sed -i "s/var_client_id/$TF_VAR_clientId/g" charts/argocd/values.yaml
+      - sed -i "s/var_org_name/$TF_VAR_githubOrganizationName/g" charts/argocd/values.yaml
+      - sed -i "s/var_team_name/$TF_VAR_teamName/g" charts/argocd/values.yaml
+      
+      - sed -i "s/tag_project_name/$TF_VAR_Project/g" charts/ingress-nginx/values.yaml
+      - sed -i "s/tag_managed_by/$TF_VAR_ManagedBy/g" charts/ingress-nginx/values.yaml
+      - sed -i "s/tag_tagging_version/$TF_VAR_TaggingVersion/g" charts/ingress-nginx/values.yaml
+      - sed -i "s/tag_confidentiality/$TF_VAR_Confidentiality/g" charts/ingress-nginx/values.yaml
+      - sed -i "s/tag_environment/$TF_VAR_Environment/g" charts/ingress-nginx/values.yaml
+      - sed -i "s/tag_security_zone/$TF_VAR_SecurityZone/g" charts/ingress-nginx/values.yaml
+      
+      # - chmod +x scripts/adopt_existing_resource.sh || true
+      # - ./scripts/adopt_existing_resource.sh  || true
+      
+      - chmod +x scripts/terraform_exec.sh
+      - ./scripts/terraform_exec.sh
+      
+      - chmod +x scripts/aws_assume_role.sh || true
+      - ./scripts/aws_assume_role.sh $TF_VAR_DEPLOY_ROLE gks-eks tenant || true
+      
+      - chmod +x scripts/post_cluster_deployment.sh
+      - ./scripts/post_cluster_deployment.sh || true
+      
+      - kubectl describe cm aws-auth -n kube-system || true
+      
+  post_build:
+    commands:
+      - |
+        if [ "$TF_ACTION" = "apply -auto-approve" ] ; 
+        then
+        terraform_output=$(terraform output -json)
+        echo $terraform_output
+        aws sns publish --topic-arn $TOPIC_ARN --message "$terraform_output"
+        fi
+      - echo "terraform $TF_VERSION $TF_ACTION on $TF_VAR_ENV completed on `date`"

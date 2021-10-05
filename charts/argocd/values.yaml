@@ -1,0 +1,23 @@
+server:
+  config:
+    # Argo CD's externally facing base URL (optional). Required when configuring SSO
+    url: var_argo_url
+    # Argo CD instance label key
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    dex.config: |
+      connectors: 
+       # GitHub enterprise Vodafone
+       - type: github
+         id: github
+         name: GitHub
+         config:
+           hostName: github.vodafone.com
+           clientID: var_client_id
+           clientSecret: $dex.github.clientSecret
+           orgs:
+           - name: var_org_name 
+             teams:
+             - name: var_team_name
+
+  ## Annotations to be added to ArgoCD ConfigMap
+  configAnnotations: {}
