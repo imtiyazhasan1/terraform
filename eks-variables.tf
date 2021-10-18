@@ -265,23 +265,10 @@ variable "whitelisted_ips" {
   # default     = []
 }
 
-variable "is_existing_subnet" {
-  type        = bool
-  description = "store value whether to provision subnet for nat gw and endpoint cluster deployment"
-}
-
-variable "configure_efs" {
-  type        = bool
-}
-
-variable "efs_ids" {
-  type        = list(string)
-  description = "EFS Volume Ids."
-}
-
-
-
-
+# variable "is_existing_subnet" {
+#   type        = bool
+#   description = "store value whether to provision subnet for nat gw and endpoint cluster deployment"
+# }
 
 # variable "aws_vpc_cni" {
 #   description = "Installs the AWS CNI Daemonset"

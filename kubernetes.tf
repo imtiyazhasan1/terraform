@@ -1,5 +1,3 @@
-data "aws_caller_identity" "current" {}
-
 locals {
 
   certificate_authority_data               = base64decode(aws_eks_cluster.eks-cluster.certificate_authority.0.data) 
@@ -23,7 +21,7 @@ locals {
       ]
     },
     {
-      rolearn: "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gocd-agent-deploy-role"
+      rolearn: "arn:aws:iam::031555447040:role/gocd-agent-deploy-role"
       username: "gocd-agent-deploy-role"
       groups : [
         "system:masters"
