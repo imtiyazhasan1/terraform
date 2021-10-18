@@ -16,7 +16,7 @@ resource "aws_vpc_endpoint" "S3" {
 resource "aws_vpc_endpoint_route_table_association" "S3_attach" {
 
   count           = var.count_subnet
-  route_table_id  = aws_route_table.eksVpcRouteTable.id
+  route_table_id  = aws_route_table.eksVpcRouteTable[0].id
   vpc_endpoint_id = aws_vpc_endpoint.S3.id
 }
 #*******----- end resource -----********

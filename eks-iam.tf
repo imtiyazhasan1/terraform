@@ -51,6 +51,31 @@ resource "aws_iam_role" "eks-worker-node" {
   })
 }
 
+//inline policy for LogGroup
+resource "aws_iam_role_policy" "terrafrom_log_policy" {
+  name = "eks_log_policy"
+  role = aws_iam_role.eks-worker-node.id
+
+  policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:DescribeLogGroups",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+  }
+  EOF
+}
+
 //inline policy for ASG
 resource "aws_iam_role_policy" "terrafrom_ASG_policy" {
   name = "eks_ASG_policy"
@@ -162,9 +187,6 @@ resource "aws_iam_role_policy_attachment" "eks_s3_ssm_attach" {
   role       = aws_iam_role.eks-worker-node.name
 }
 
-
-
-
 resource "aws_iam_role_policy_attachment" "eks-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.eks-worker-node.name
@@ -197,6 +219,11 @@ resource "aws_iam_role_policy_attachment" "eks-AmazonS3ReadOnlyAccess" {
 
 resource "aws_iam_role_policy_attachment" "eks-AmazonSSMManagedInstanceCore" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.eks-worker-node.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks-AmazonElasticFileSystemFullAccess" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
   role       = aws_iam_role.eks-worker-node.name
 }
 

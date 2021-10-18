@@ -5,15 +5,15 @@ server:
     # Argo CD instance label key
     application.instanceLabelKey: argocd.argoproj.io/instance
     dex.config: |
-      connectors:
+      connectors: 
        # GitHub enterprise Vodafone
        - type: github
-         id: acme-github
-         name: Acme GitHub
+         id: github
+         name: GitHub
          config:
            hostName: github.vodafone.com
            clientID: var_client_id
-           clientSecret: $dex.acme.clientSecret
+           clientSecret: $dex.github.clientSecret
            orgs:
            - name: var_org_name 
              teams:

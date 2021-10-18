@@ -29,6 +29,7 @@ phases:
       - sed -i "s/tag_environment/$TF_VAR_Environment/g" charts/ingress-nginx/values.yaml
       - sed -i "s/tag_security_zone/$TF_VAR_SecurityZone/g" charts/ingress-nginx/values.yaml
       
+      - cat ./charts/argocd/values.yaml
       # - chmod +x scripts/adopt_existing_resource.sh || true
       # - ./scripts/adopt_existing_resource.sh  || true
       
@@ -42,6 +43,7 @@ phases:
       - ./scripts/post_cluster_deployment.sh || true
       
       - kubectl describe cm aws-auth -n kube-system || true
+      - kubectl describe deploy argocd -n argocd || true
       
   post_build:
     commands:
