@@ -63,7 +63,7 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
 }
 
 resource "helm_release" "cluster_autoscaler" {
-  depends_on   = [aws_eks_cluster.eks-cluster]
+  depends_on   = [aws_eks_node_group.eks-cluster-workerNodeGroup]
   name        = "cluster-autoscaler"
   namespace   = "kube-system"
   repository  = "https://kubernetes.github.io/autoscaler"

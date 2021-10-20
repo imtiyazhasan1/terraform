@@ -1,4 +1,4 @@
-data "aws_caller_identity" "current" {}
+# data "aws_caller_identity" "current" {}
 
 locals {
 
@@ -30,7 +30,7 @@ locals {
       ]
     },
     {
-      rolearn: "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gocd-agent-deploy-role"
+      rolearn: "arn:aws:iam::618826489558:role/gocd-agent-deploy-role"
       username: "gocd-agent-deploy-role"
       groups : [
         "system:masters"
