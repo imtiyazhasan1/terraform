@@ -12,4 +12,5 @@ locals {
     Environment     = var.Environment
     SecurityZone    = var.SecurityZone
   }
+  docker_secret = "${lookup(var.Harbor_creds,"username")}:${lookup(var.Harbor_creds,"password")}"
 }

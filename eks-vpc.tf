@@ -18,13 +18,11 @@ resource "aws_vpc" "eksVPC" {
 
 ##### AWS VPC Private Subnet ####
 resource "aws_subnet" "eksVpcSubnet" {
-  map_public_ip_on_launch = true
   count             = var.count_subnet
   vpc_id            = aws_vpc.eksVPC.id
   cidr_block        = element(cidrsubnets(var.eks_cidr_block, 8, 8, 8, 8, 8, 8, 8, 8), count.index + 1)
   availability_zone =  var.availability_zones[count.index]
-  # availability_zone = data.aws_availability_zones.available.names[count.index]
-  
+  map_public_ip_on_launch = false
 
   tags = merge(local.common_tags,
     {
@@ -102,7 +100,7 @@ resource "aws_nat_gateway" "nat" {
   count      = var.count_subnet
   depends_on    = [aws_internet_gateway.ig]
   allocation_id = "${element(aws_eip.nat_eip.*.id, count.index)}"
-  subnet_id     = "${element(aws_subnet.eksVpcPublicSubnet.*.id, 0)}"
+  subnet_id     = "${element(aws_subnet.eksVpcPublicSubnet.*.id, count.index)}"
   tags = merge(local.common_tags,
     {
       Name       = "${var.vpc_name}-Nat-Gateway-${count.index + 1}"
@@ -113,18 +111,18 @@ resource "aws_nat_gateway" "nat" {
 
 ##### AWS VPC Private Subnet ####
 resource "aws_subnet" "eksVpcPublicSubnet" {
-  map_public_ip_on_launch = true
   count             = var.count_subnet
   vpc_id            = aws_vpc.eksVPC.id
   cidr_block        = element(cidrsubnets(var.eks_cidr_block, 8, 8, 8, 8, 8, 8, 8, 8), count.index + var.count_subnet + 1)
   availability_zone =  var.availability_zones[count.index]
+  map_public_ip_on_launch = true
   
 
   tags = merge(local.common_tags,
     {
       Name                                        = "${var.vpc_name}-public-subnet-${count.index + 1}"
       "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-      "kubernetes.io/role/internal-elb"           = 1
+      "kubernetes.io/role/elb"           = 1
       Managed-by                                  = "Terraform"
     }
   )
@@ -163,10 +161,10 @@ resource "aws_route_table_association" "eksVpcPublicRouteTableAttach" {
 ##### AWS VPC Additional Private Subnet ####
 resource "aws_subnet" "eksVpcAdditionalPrivateSubnet" {
   count             = length(var.additional_subnets_cidr_block)
-  map_public_ip_on_launch = true
   vpc_id            = aws_vpc.eksVPC.id
   cidr_block        = var.additional_subnets_cidr_block[count.index]
   availability_zone = var.availability_zones[count.index]
+  map_public_ip_on_launch = false
   
 
   tags = merge(local.common_tags,
@@ -183,39 +181,5 @@ resource "aws_subnet" "eksVpcAdditionalPrivateSubnet" {
 resource "aws_route_table_association" "eksVpcAdditionalPrivateSubnetRouteTableAttach" {
   count          = length(var.additional_subnets_cidr_block)
   subnet_id      = aws_subnet.eksVpcAdditionalPrivateSubnet[count.index].id
-  #route_table_id = aws_route_table.eksVpcRouteTable.id
   route_table_id = "${element(aws_route_table.eksVpcRouteTable.*.id, 0)}"
 }
-
-
-# resource "aws_vpc_ipv4_cidr_block_association" "secondary_cidr" {
-#   count = length(var.secondary_vpc_cidr_blocks)
-#   vpc_id = aws_vpc.eksVPC.id
-#   cidr_block = element(var.secondary_vpc_cidr_blocks, count.index)
-# }
-
-# ##### AWS VPC Additional Private Subnet ####
-# resource "aws_subnet" "eksVpcAdditionalPrivateSubnet" {
-#   map_public_ip_on_launch = true
-#   count             = length(var.secondary_vpc_cidr_blocks) > 0 ? var.count_subnet : 0
-#   vpc_id            = aws_vpc.eksVPC.id
-#   cidr_block        = element(cidrsubnets(var.secondary_vpc_cidr_blocks, 8, 8, 8, 8, 8), count.index)
-#   availability_zone = var.availability_zones[count.index]
-  
-
-#   tags = merge(local.common_tags,
-#     {
-#       Name                                        = "${var.vpc_name}-additional-private-subnet-${count.index + 1}"
-#       "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-#       "kubernetes.io/role/internal-elb"           = 1
-#       Managed-by                                  = "Terraform"
-#     }
-#   )
-# }
-# #*******----- end resource -----********
-
-# resource "aws_route_table_association" "eksVpcAdditionalPrivateSubnetRouteTableAttach" {
-#   count = length(var.secondary_vpc_cidr_blocks) > 0 ? var.count_subnet : 0
-#   subnet_id      = aws_subnet.eksVpcAdditionalPrivateSubnet[count.index].id
-#   route_table_id = aws_route_table.eksVpcRouteTable.id
-# }

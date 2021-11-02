@@ -1,7 +1,12 @@
 #!/bin/bash
 
-terraform init -no-color 
-terraform $TF_ACTION -no-color
+export TF_VAR_Harbor_creds=`echo "${TF_HarborCreds//[:]/=}"`
+echo $TF_VAR_Harbor_creds
+
+echo "terraform execution starts"
+
+terraform init -no-color -lock=false
+terraform $TF_ACTION -no-color -lock=false
 if [ "$TF_ACTION" = "destroy -auto-approve" ] ; 
 then
 sleep 10

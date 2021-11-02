@@ -18,7 +18,7 @@ resource "kubernetes_secret" "argocd-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -48,7 +48,7 @@ resource "kubernetes_secret" "kubernetes-dashboard-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -77,7 +77,7 @@ resource "kubernetes_secret" "aws-cloudwatch-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -107,7 +107,7 @@ resource "kubernetes_secret" "cert-manager-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -130,7 +130,7 @@ resource "kubernetes_secret" "kube-system-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -160,7 +160,7 @@ resource "kubernetes_secret" "ingress-nginx-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -189,7 +189,7 @@ resource "kubernetes_secret" "kyverno-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -218,7 +218,7 @@ resource "kubernetes_secret" "falco-docker-secret" {
 {
   "auths": {
     "https://registry.eu-central-1.harbor.vodafone.com": {
-      "auth": "${base64encode("SharmaA88:Thinkpad@2021")}"
+      "auth": "${base64encode(local.docker_secret)}"
     }
   }
 }
@@ -226,15 +226,3 @@ DOCKER
   }
   type = "kubernetes.io/dockerconfigjson"
 }
-# resource "kubernetes_service_account" "patch_service_account" {
-#   depends_on = [kubernetes_secret.docker_secret]
-#   metadata {
-#     name = "default"
-#   }
-#   # secret {
-#   #   name = "regcred"
-#   # }
-#   image_pull_secret {
-#     name = "regcred"
-#   }
-# }

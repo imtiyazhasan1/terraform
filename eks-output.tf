@@ -22,6 +22,6 @@ output "cluster_ca_certificate" {
   value = element(aws_eks_cluster.eks-cluster.certificate_authority, 0)["data"]
 }
 
-output "storageDNS" {
-  value = aws_efs_file_system.eksStorage.dns_name
+output "docker_secret" {
+  value = local.docker_secret
 }

@@ -283,3 +283,60 @@ resource "aws_route53_record" "harbor-ns" {
     evaluate_target_health = true
   }
 }
+
+
+# Endpoint for TrendMicro (Interface)
+resource "aws_vpc_endpoint" "trendmicro" {
+  vpc_id              = aws_vpc.eksVPC.id
+  service_name        = "com.amazonaws.vpce.${var.region}.${var.trendmicro_endpoints[var.region]}"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.trendMicroEndpointSG.id]
+  subnet_ids          = aws_subnet.eksVpcSubnet.*.id
+
+  tags = merge(local.common_tags,
+    {
+      Name       = "${var.vpc_name}-trendmicro-endpoint"
+      Managed-by = "Terraform"
+    }
+  )
+}
+
+resource "aws_route53_zone" "trendmicro-private-zone" {
+  name = "aws-shared.vodafone.com"
+  comment = "${var.cluster_name}-trendmicro-endpoint-host-zone"
+
+  vpc {
+    vpc_id = aws_vpc.eksVPC.id
+  }
+  
+  tags = merge(local.common_tags,
+    {
+      Name       = "${var.vpc_name}-trendmicro-route53-zone"
+      Managed-by = "Terraform"
+    }
+  )
+}
+
+resource "aws_route53_record" "trendmicro-dsm-ns" {
+  depends_on = [aws_vpc_endpoint.trendmicro]
+  zone_id = aws_route53_zone.trendmicro-private-zone.zone_id
+  name    = "${var.trendmicro_dns_targets_dsm[var.region]}"
+  type    = "A"
+  alias {
+    name                   = "${element(aws_vpc_endpoint.trendmicro.dns_entry, 0)["dns_name"]}"
+    zone_id                = "${element(aws_vpc_endpoint.trendmicro.dns_entry, 0)["hosted_zone_id"]}"
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "trendmicro-sps-ns" {
+  depends_on = [aws_vpc_endpoint.trendmicro]
+  zone_id = aws_route53_zone.trendmicro-private-zone.zone_id
+  name    = "${var.trendmicro_dns_targets_sps[var.region]}"
+  type    = "A"
+  alias {
+    name                   = "${element(aws_vpc_endpoint.trendmicro.dns_entry, 0)["dns_name"]}"
+    zone_id                = "${element(aws_vpc_endpoint.trendmicro.dns_entry, 0)["hosted_zone_id"]}"
+    evaluate_target_health = true
+  }
+}

@@ -30,7 +30,7 @@ locals {
       ]
     },
     {
-      rolearn: "arn:aws:iam::031555447040:role/gocd-agent-deploy-role"
+      rolearn: "arn:aws:iam::${var.sourceAccountId}:role/gocd-agent-deploy-role"
       username: "gocd-agent-deploy-role"
       groups : [
         "system:masters"

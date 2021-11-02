@@ -3,6 +3,8 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "0.12.28"
+  secrets-manager:
+    TF_HarborCreds: "$Harbor_creds"
  
 phases:
   install:
@@ -13,6 +15,7 @@ phases:
  
   build:
     commands:
+      - echo $TF_HarborCreds
       - curl -kvvv https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud || true
       - cd "$CODEBUILD_SRC_DIR"
       - sed -i "s/cluster_name/$TF_VAR_cluster_name/g" _terraform.tf
@@ -29,7 +32,14 @@ phases:
       - sed -i "s/tag_environment/$TF_VAR_Environment/g" charts/ingress-nginx/values.yaml
       - sed -i "s/tag_security_zone/$TF_VAR_SecurityZone/g" charts/ingress-nginx/values.yaml
       
-      - cat ./charts/argocd/values.yaml
+      - sed -i "s/tf_s3_bucket/$TF_VAR_TFStateBucket/g" ./_terraform.tf
+      - sed -i "s/tf_dynamodb_table/$TF_VAR_TFStateDynamoDB/g" ./_terraform.tf
+      - sed -i "s/tf_region/$TF_VAR_TFStateRegion/g" ./_terraform.tf
+      - sed -i "s#tf_kms_key_arn#$TF_VAR_TFStateKMSKeyARN#g" ./_terraform.tf
+      
+      - printenv | grep $TF_VAR_trendMicroTenantId || true
+      - sed -i "s/tenantNameValue/$TF_VAR_trendMicroTenantId/g" ./eks-userdata.tpl || true
+      
       # - chmod +x scripts/adopt_existing_resource.sh || true
       # - ./scripts/adopt_existing_resource.sh  || true
       
@@ -43,7 +53,6 @@ phases:
       - ./scripts/post_cluster_deployment.sh || true
       
       - kubectl describe cm aws-auth -n kube-system || true
-      - kubectl describe deploy argocd -n argocd || true
       
   post_build:
     commands:

@@ -38,7 +38,6 @@ resource "aws_security_group_rule" "workerNode-egress-all" {
   security_group_id = aws_security_group.eksWorkerNodeGroup.id
 }
 
-
 resource "aws_security_group_rule" "workerNode-ingress-https" {
   description              = "Allow pods to communicate with the cluster API Server"
   from_port                = 443
@@ -49,8 +48,6 @@ resource "aws_security_group_rule" "workerNode-ingress-https" {
   security_group_id        = aws_security_group.eksWorkerNodeGroup.id
 }
 
-
-
 resource "aws_security_group_rule" "workerNode-ingress-custom-tcp" {
   description              = "Allow pods to communicate with the cluster API Server"
   from_port                = 1025
@@ -58,5 +55,55 @@ resource "aws_security_group_rule" "workerNode-ingress-custom-tcp" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.eksDefaultMasterSG.id
   type                     = "ingress"
+  security_group_id        = aws_security_group.eksWorkerNodeGroup.id
+}
+
+resource "aws_security_group_rule" "workerNode-egress-trendmicro-https" {
+  description              = "Allow pods to communicate with the trendmicro endpoint"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.trendMicroEndpointSG.id
+  type                     = "egress"
+  security_group_id        = aws_security_group.eksWorkerNodeGroup.id
+}
+
+resource "aws_security_group_rule" "workerNode-egress-trendmicro-custom1" {
+  description              = "Allow pods to communicate with the trendmicro endpoint"
+  from_port                = 8443
+  to_port                  = 8443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.trendMicroEndpointSG.id
+  type                     = "egress"
+  security_group_id        = aws_security_group.eksWorkerNodeGroup.id
+}
+
+resource "aws_security_group_rule" "workerNode-egress-trendmicro-custom2" {
+  description              = "Allow pods to communicate with the trendmicro endpoint"
+  from_port                = 4120
+  to_port                  = 4120
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.trendMicroEndpointSG.id
+  type                     = "egress"
+  security_group_id        = aws_security_group.eksWorkerNodeGroup.id
+}
+
+resource "aws_security_group_rule" "workerNode-egress-trendmicro-custom3" {
+  description              = "Allow pods to communicate with the trendmicro endpoint"
+  from_port                = 4122
+  to_port                  = 4122
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.trendMicroEndpointSG.id
+  type                     = "egress"
+  security_group_id        = aws_security_group.eksWorkerNodeGroup.id
+}
+
+resource "aws_security_group_rule" "workerNode-egress-trendmicro-custom4" {
+  description              = "Allow pods to communicate with the trendmicro endpoint"
+  from_port                = 5275
+  to_port                  = 5275
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.trendMicroEndpointSG.id
+  type                     = "egress"
   security_group_id        = aws_security_group.eksWorkerNodeGroup.id
 }

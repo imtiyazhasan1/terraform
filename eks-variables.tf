@@ -155,6 +155,34 @@ variable "harbor_Dns_targets" {
     "eu-central-1" = "registry.internal.harbor.vodafone.com"
   }
 }
+
+variable "trendmicro_endpoints" {
+  type = map(string)
+  default = {
+    "eu-west-1"    = "vpce-svc-021ea81a4876d04a1"
+    "eu-west-2"    = "vpce-svc-0370ca0f96da7ae00"
+    "eu-central-1" = "vpce-svc-04995ddbf25c34631"
+    "eu-south-1"   = "vpce-svc-04be9df225a5989fd"
+  }
+}
+
+variable "trendmicro_dns_targets_dsm" {
+  type = map(string)
+  default = {
+    "eu-west-1"    = "trend-dsm.aws-shared.vodafone.com"
+    "eu-west-2"    = "trend-dsm.aws-shared.vodafone.com"
+    "eu-central-1" = "trend-dsm.aws-shared.vodafone.com"
+  }
+}
+
+variable "trendmicro_dns_targets_sps" {
+  type = map(string)
+  default = {
+    "eu-west-1"    = "trend-sps.aws-shared.vodafone.com"
+    "eu-west-2"    = "trend-sps.aws-shared.vodafone.com"
+    "eu-central-1" = "trend-sps.aws-shared.vodafone.com"
+  }
+}
 ######################### varibale for Tagging Management System########################
 
 variable "Project" {
@@ -275,13 +303,26 @@ variable "configure_efs" {
 }
 
 variable "efs_ids" {
-  type        = list(string)
+  type        = string
   description = "EFS Volume Ids."
 }
 
+variable "Harbor_creds" {
+  type = object({
+    password =  string
+    username =  string
+  })
+}
 
+variable "sourceAccountId" {
+  type        = string
+  description = "Source Account ID"
+}
 
-
+variable "trendMicroTenantId" {
+  type        = string
+  description = "Tenant ID based on tenant name for trendmicro registration"
+}
 
 # variable "aws_vpc_cni" {
 #   description = "Installs the AWS CNI Daemonset"

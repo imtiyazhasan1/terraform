@@ -4,8 +4,8 @@ resource "helm_release" "cert_manager" {
   namespace  = "cert-manager"
   # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "cert-manager"
   set {
     name  = "installCRDs"
@@ -22,8 +22,8 @@ resource "helm_release" "k8s_dashboard" {
   namespace  = "kubernetes-dashboard"
   # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "kubernetes-dashboard"
   depends_on = [aws_route53_record.harbor-ns,helm_release.nginx_ingress,kubernetes_secret.kubernetes-dashboard-docker-secret,helm_release.cert_manager]
   set {
@@ -54,8 +54,8 @@ resource "helm_release" "aws_cloudwatch_metric" {
   namespace  = "aws-cloudwatch"
   # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "aws-cloudwatch-metrics"
   set {
     name  = "clusterName"
@@ -76,8 +76,8 @@ resource "helm_release" "aws_calico" {
   name       = "aws-calico"
   namespace  = "kube-system"
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "aws-calico"
   timeout = 600
   set {
@@ -91,8 +91,8 @@ resource "helm_release" "metrics_server" {
   name       = "metrics-server"
   namespace  = "kube-system"
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "metrics-server"
   timeout = 600
   set {
@@ -108,8 +108,8 @@ resource "helm_release" "argocd" {
   namespace  = "argocd"
   # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "argo-cd"
   timeout = 700
   values = [
@@ -156,8 +156,8 @@ resource "helm_release" "kubewatch" {
   namespace  = "kube-system"
   # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
-  repository_username = "SharmaA88"
-  repository_password = "Thinkpad@2021"
+  repository_username = lookup(var.Harbor_creds,"username")
+  repository_password = lookup(var.Harbor_creds,"password")
   chart      = "kubewatch"
   set {
     name  = "slack.enabled"
