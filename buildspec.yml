@@ -38,7 +38,7 @@ phases:
       - sed -i "s#tf_kms_key_arn#$TF_VAR_TFStateKMSKeyARN#g" ./_terraform.tf
       
       - printenv | grep $TF_VAR_trendMicroTenantId || true
-      - sed -i "s/tenantNameValue/$TF_VAR_trendMicroTenantId/g" ./eks-userdata.tpl || true
+      - sed -i "s/tenantNameValue/$TF_VAR_trendMicroTenantId/g" ./eks-userdata.tpl
       
       # - chmod +x scripts/adopt_existing_resource.sh || true
       # - ./scripts/adopt_existing_resource.sh  || true

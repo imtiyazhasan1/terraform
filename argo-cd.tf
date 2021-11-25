@@ -6,6 +6,7 @@ resource "helm_release" "cert_manager" {
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
+  version             = "v1.4.0"
   chart      = "cert-manager"
   set {
     name  = "installCRDs"
@@ -25,6 +26,7 @@ resource "helm_release" "k8s_dashboard" {
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
   chart      = "kubernetes-dashboard"
+  version    = "4.2.0"
   depends_on = [aws_route53_record.harbor-ns,helm_release.nginx_ingress,kubernetes_secret.kubernetes-dashboard-docker-secret,helm_release.cert_manager]
   set {
     name  = "ingress.enabled"
@@ -43,6 +45,14 @@ resource "helm_release" "k8s_dashboard" {
     value = "HTTPS"
   }
   set {
+    name   = "ingress.annotations\\.kubernetes\\.io/ingress\\.class"
+    value  = "nginx"
+  }
+  set {
+    name  = "ingress.annotations\\.nginx\\.ingress\\.kubernetes\\.io/whitelist-source-range"
+    value = "0.0.0.0/0"
+  }
+  set {
     name  = "global.imagePullSecrets[0].name"
     value = kubernetes_secret.kubernetes-dashboard-docker-secret.metadata.0.name
   }
@@ -57,6 +67,7 @@ resource "helm_release" "aws_cloudwatch_metric" {
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
   chart      = "aws-cloudwatch-metrics"
+  version    = "0.0.5"
   set {
     name  = "clusterName"
     value = var.cluster_name
@@ -79,6 +90,7 @@ resource "helm_release" "aws_calico" {
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
   chart      = "aws-calico"
+  version    = "0.3.5"
   timeout = 600
   set {
     name  = "global.imagePullSecrets[0].name"
@@ -94,6 +106,7 @@ resource "helm_release" "metrics_server" {
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
   chart      = "metrics-server"
+  version    = "2.11.2"
   timeout = 600
   set {
     name  = "global.imagePullSecrets[0].name"
@@ -111,6 +124,7 @@ resource "helm_release" "argocd" {
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
   chart      = "argo-cd"
+  version    = "3.6.5"
   timeout = 700
   values = [
     file("charts/argocd/values.yaml"),
@@ -158,6 +172,7 @@ resource "helm_release" "kubewatch" {
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
+  version         = "3.2.6"
   chart      = "kubewatch"
   set {
     name  = "slack.enabled"
