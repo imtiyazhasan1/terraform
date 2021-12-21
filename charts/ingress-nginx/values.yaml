@@ -7,7 +7,7 @@ controller:
     tag: "v1.0.2"
     digest: ""
   service:
-    externalTrafficPolicy: "local"
+    externalTrafficPolicy: "Local"
     enabled: true
     annotations: 
       service.beta.kubernetes.io/aws-load-balancer-type: nlb
@@ -23,7 +23,7 @@ controller:
         service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp     
         service.beta.kubernetes.io/aws-load-balancer-internal: "true"
       loadBalancerSourceRanges: []
-      externalTrafficPolicy: "local"
+      externalTrafficPolicy: "Local"
     patch:
       enabled: true
       image:

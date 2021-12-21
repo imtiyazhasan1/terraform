@@ -1,7 +1,6 @@
 ## This part of efs creation would be applied for only new vpc. For existing vpc this part can be removed
 ## starts efs creation
 # Random Number
-/*
 resource "random_id" "random_number3" { 
     byte_length = 4
 }
@@ -41,7 +40,7 @@ resource "helm_release" "helmefs" {
   repository_password = lookup(var.Harbor_creds,"password")
   depends_on = [aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.kube-system-docker-secret,aws_efs_file_system.eksStorage,aws_efs_mount_target.eksStorageTarget]
   set {
-    name  = "imagePullSecrets[0].name"
+    name  = "imagePullSecrets.name"
     value = kubernetes_secret.kube-system-docker-secret.metadata.0.name
   }
   set {
@@ -57,7 +56,7 @@ resource "helm_release" "helmefs" {
 resource "kubernetes_storage_class" "efssc" {
   count      = var.configure_efs ? 1 : 0
   metadata {
-    name = "efs-sc-${random_id.random_number_efs.hex}"
+    name = "efs-sc-${random_id.random_number3.hex}"
   }
     depends_on = [aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.kube-system-docker-secret,aws_efs_file_system.eksStorage,aws_efs_mount_target.eksStorageTarget]
   storage_provisioner = "efs.csi.aws.com"
@@ -74,4 +73,3 @@ resource "kubernetes_storage_class" "efssc" {
   mount_options = [ "tls" ]
 }
 ## end efs controller deployment
-*/

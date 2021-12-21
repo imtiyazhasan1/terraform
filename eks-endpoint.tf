@@ -237,6 +237,7 @@ resource "aws_vpc_endpoint_subnet_association" "sts_attach" {
 }
 #*******----- end resource -----********
 
+
 # Endpoint for Harbor (Interface)
 resource "aws_vpc_endpoint" "harbor" {
   vpc_id              = aws_vpc.eksVPC.id
@@ -282,6 +283,7 @@ resource "aws_route53_record" "harbor-ns" {
     evaluate_target_health = true
   }
 }
+
 
 # Endpoint for TrendMicro (Interface)
 resource "aws_vpc_endpoint" "trendmicro" {

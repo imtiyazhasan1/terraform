@@ -2,7 +2,6 @@ resource "helm_release" "cert_manager" {
   depends_on = [aws_route53_record.harbor-ns,aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.cert-manager-docker-secret]
   name       = "cert-manager"
   namespace  = "cert-manager"
-  # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
@@ -21,7 +20,6 @@ resource "helm_release" "cert_manager" {
 resource "helm_release" "k8s_dashboard" {
   name       = "kubernetes-dashboard"
   namespace  = "kubernetes-dashboard"
-  # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
@@ -50,7 +48,7 @@ resource "helm_release" "k8s_dashboard" {
   }
   set {
     name  = "ingress.annotations\\.nginx\\.ingress\\.kubernetes\\.io/whitelist-source-range"
-    value = "0.0.0.0/0"
+    value = "{${join(",", var.nlb_whitelisted_ips)}}"
   }
   set {
     name  = "global.imagePullSecrets[0].name"
@@ -62,7 +60,6 @@ resource "helm_release" "aws_cloudwatch_metric" {
   depends_on = [aws_route53_record.harbor-ns,aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.aws-cloudwatch-docker-secret]
   name       = "aws-cloudwatch-metric"
   namespace  = "aws-cloudwatch"
-  # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
@@ -73,7 +70,11 @@ resource "helm_release" "aws_cloudwatch_metric" {
     value = var.cluster_name
   }
   set {
-    name  = "global.imagePullSecrets[0].name"
+    name  = "image.repository"
+    value = "registry.eu-central-1.harbor.vodafone.com/gks-public-cloud/cloudwatch-agent"
+  }
+  set {
+    name  = "imagePullSecrets[0].name"
     value = kubernetes_secret.aws-cloudwatch-docker-secret.metadata.0.name
   }
 }
@@ -119,7 +120,6 @@ resource "helm_release" "argocd" {
   depends_on = [aws_route53_record.harbor-ns,helm_release.nginx_ingress,kubernetes_secret.argocd-docker-secret,helm_release.cert_manager]
   name       = "argocd"
   namespace  = "argocd"
-  # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
@@ -161,6 +161,11 @@ resource "helm_release" "argocd" {
     name  = "global.imagePullSecrets[0].name"
     value = kubernetes_secret.argocd-docker-secret.metadata.0.name
   }
+  set {
+    name  = "server.ingress.annotations\\.nginx\\.ingress\\.kubernetes\\.io/whitelist-source-range"
+    value = "{${join(",", var.nlb_whitelisted_ips)}}"
+    type  = "string"
+  }
 }
 
 resource "helm_release" "kubewatch" {
@@ -168,7 +173,6 @@ resource "helm_release" "kubewatch" {
   depends_on = [aws_route53_record.harbor-ns,aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.kube-system-docker-secret]
   name       = "kubewatch"
   namespace  = "kube-system"
-  # create_namespace = true
   repository = "https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud"
   repository_username = lookup(var.Harbor_creds,"username")
   repository_password = lookup(var.Harbor_creds,"password")
@@ -199,3 +203,80 @@ resource "helm_release" "kubewatch" {
     value = kubernetes_secret.kube-system-docker-secret.metadata.0.name
   }
 }
+/*
+resource "kubernetes_manifest" "job_kube_system_kube_bench" {
+  depends_on = [aws_route53_record.harbor-ns,aws_eks_node_group.eks-cluster-workerNodeGroup,kubernetes_secret.kube-system-docker-secret]
+  manifest = {
+    "apiVersion" = "batch/v1"
+    "kind" = "Job"
+    "metadata" = {
+      "name" = "kube-bench"
+      "namespace" = "kube-system"
+    }
+    "spec" = {
+      "template" = {
+        "spec" = {
+          "containers" = [
+            {
+              "command" = [
+                "kube-bench",
+                "run",
+                "--targets",
+                "node",
+                "--benchmark",
+                "eks-1.0",
+              ]
+              "image" = "registry.eu-central-1.harbor.vodafone.com/gks-public-cloud/kube-bench:v0.6.5"
+              "name" = "kube-bench"
+              "volumeMounts" = [
+                {
+                  "mountPath" = "/var/lib/kubelet"
+                  "name" = "var-lib-kubelet"
+                  "readOnly" = true
+                },
+                {
+                  "mountPath" = "/etc/systemd"
+                  "name" = "etc-systemd"
+                  "readOnly" = true
+                },
+                {
+                  "mountPath" = "/etc/kubernetes"
+                  "name" = "etc-kubernetes"
+                  "readOnly" = true
+                },
+              ]
+            },
+          ]
+          "hostPID" = true
+          "imagePullSecrets" = [
+            {
+              "name" = "regcred"
+            },
+          ]
+          "restartPolicy" = "Never"
+          "volumes" = [
+            {
+              "hostPath" = {
+                "path" = "/var/lib/kubelet"
+              }
+              "name" = "var-lib-kubelet"
+            },
+            {
+              "hostPath" = {
+                "path" = "/etc/systemd"
+              }
+              "name" = "etc-systemd"
+            },
+            {
+              "hostPath" = {
+                "path" = "/etc/kubernetes"
+              }
+              "name" = "etc-kubernetes"
+            },
+          ]
+        }
+      }
+    }
+  }
+}
+*/
