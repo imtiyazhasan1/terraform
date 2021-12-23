@@ -5,17 +5,35 @@ env:
     TF_VERSION: "0.12.28"
   secrets-manager:
     TF_HarborCreds: "$Harbor_creds"
+    ToolsClusterUsername: ToolsClusterCreds:username
+    ToolsClusterPassword: ToolsClusterCreds:password
  
 phases:
   install:
     commands:
       - cd /usr/bin
-      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
       - unzip -o terraform.zip
- 
+      - curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+      - chmod +x /usr/local/bin/argocd
+  
+  pre_build:
+    commands:
+      - |
+        if [ "$TF_ACTION" = "destroy -auto-approve" ] ; 
+        then
+        aws eks update-kubeconfig --name $TF_VAR_cluster_name --region $TF_VAR_region
+        argocd login --server https://argocd.eks-tools-prod-ntq4p.gks.vodafone.com --username $ToolsClusterUsername --password $ToolsClusterPassword --grpc-web argocd.eks-tools-prod-ntq4p.gks.vodafone.com --insecure
+        argocd cluster rm  $TF_VAR_eks_endpoint || true 
+        fi
+      - echo "terraform $TF_VERSION $TF_ACTION on $TF_VAR_ENV completed on `date`"
+
   build:
     commands:
       - echo $TF_HarborCreds
+      - echo $ToolsClusterUsername
+      - echo $ToolsClusterPassword
+      - echo "argocd cluster add arn:aws:eks:$TF_VAR_region:$TF_VAR_tenantAccountId:cluster/$TF_VAR_cluster_name --name $TF_VAR_cluster_name"
       - curl -kvvv https://registry.eu-central-1.harbor.vodafone.com/chartrepo/gks-public-cloud || true
       - cd "$CODEBUILD_SRC_DIR"
       - sed -i "s/cluster_name/$TF_VAR_cluster_name/g" _terraform.tf
@@ -59,6 +77,8 @@ phases:
       - |
         if [ "$TF_ACTION" = "apply -auto-approve" ] ; 
         then
+        argocd login --server https://argocd.eks-tools-prod-ntq4p.gks.vodafone.com --username $ToolsClusterUsername --password $ToolsClusterPassword --grpc-web argocd.eks-tools-prod-ntq4p.gks.vodafone.com --insecure
+        argocd cluster add arn:aws:eks:$TF_VAR_region:$TF_VAR_tenantAccountId:cluster/$TF_VAR_cluster_name --name $TF_VAR_cluster_name
         terraform_output=$(terraform output -json)
         echo $terraform_output
         aws sns publish --topic-arn $TOPIC_ARN --message "$terraform_output"

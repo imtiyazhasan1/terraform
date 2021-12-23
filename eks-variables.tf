@@ -142,8 +142,9 @@ variable "harbor_endpoints" {
   type = map(string)
   default = {
     "eu-west-1"    = "vpce-svc-0f8e9dff8e7b67d82"
-    "eu-west-2"    = "vpce-svc-0cb43646946dxxxxx"
+    "eu-west-2"    = "vpce-svc-029090383d9585e54"
     "eu-central-1" = "vpce-svc-0cb43646946d272d3"
+    "eu-south-1"   = "vpce-svc-01aa51eb54170dbef"
   }
 }
 
@@ -153,6 +154,7 @@ variable "harbor_Dns_targets" {
     "eu-west-1"    = "registry.internal.harbor.vodafone.com"
     "eu-west-2"    = "registry.internal.harbor.vodafone.com"
     "eu-central-1" = "registry.internal.harbor.vodafone.com"
+    "eu-south-1"   = "registry.internal.harbor.vodafone.com"
   }
 }
 
@@ -172,6 +174,7 @@ variable "trendmicro_dns_targets_dsm" {
     "eu-west-1"    = "trend-dsm.aws-shared.vodafone.com"
     "eu-west-2"    = "trend-dsm.aws-shared.vodafone.com"
     "eu-central-1" = "trend-dsm.aws-shared.vodafone.com"
+    "eu-south-1"   = "trend-dsm.aws-shared.vodafone.com"
   }
 }
 
@@ -181,6 +184,7 @@ variable "trendmicro_dns_targets_sps" {
     "eu-west-1"    = "trend-sps.aws-shared.vodafone.com"
     "eu-west-2"    = "trend-sps.aws-shared.vodafone.com"
     "eu-central-1" = "trend-sps.aws-shared.vodafone.com"
+    "eu-south-1"   = "trend-sps.aws-shared.vodafone.com"
   }
 }
 ######################### varibale for Tagging Management System########################
@@ -302,11 +306,6 @@ variable "configure_efs" {
   type        = bool
 }
 
-variable "efs_ids" {
-  type        = string
-  description = "EFS Volume Ids."
-}
-
 variable "Harbor_creds" {
   type = object({
     password =  string
@@ -322,6 +321,25 @@ variable "sourceAccountId" {
 variable "trendMicroTenantId" {
   type        = string
   description = "Tenant ID based on tenant name for trendmicro registration"
+}
+
+variable "configure_nlb" {
+  type        = bool
+}
+
+variable "nlb_subnets" {
+  type        = list(string)
+  description = "Subnets for network load balancer"
+}
+
+variable "nlb_whitelisted_ips" {
+  type        = list(string)
+  description = "IP addresses to access nlb"
+}
+
+variable "proxy" {
+  type        = string
+  description = "proxy value for taas transit gateway"
 }
 
 # variable "aws_vpc_cni" {

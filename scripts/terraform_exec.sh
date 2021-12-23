@@ -3,7 +3,10 @@
 export TF_VAR_Harbor_creds=`echo "${TF_HarborCreds//[:]/=}"`
 echo $TF_VAR_Harbor_creds
 
+cat ./post-cluster-components.tf
 echo "terraform execution starts"
+
+#export TF_LOG=DEBUG
 
 terraform init -no-color -lock=false
 terraform $TF_ACTION -no-color -lock=false

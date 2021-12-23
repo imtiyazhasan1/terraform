@@ -31,9 +31,10 @@ resource "aws_launch_template" "worker-node-config_template" {
 
     tags = merge(local.common_tags,
       {
-        Managed-by = "Terraform"
-        Name       = "${var.cluster_name}"
-        "AWS"      = "PCS-Managed"
+        Managed-by  = "Terraform"
+        Name        = "${var.cluster_name}"
+        "AWS"       = "PCS-Managed"
+        ScheduledBy = "GksInstanceScheduler"
       }
     )
   }

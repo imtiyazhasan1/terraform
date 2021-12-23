@@ -4,7 +4,7 @@ variable "DEPLOY_ROLE" {} # Defined as (TF_VAR_)environment variable in CodeBuil
 
 provider "aws" {
   region = var.region # replace with target region which has the codecommit repos, do not change after first being set
-
+  #version = "3.35.0"
   assume_role {
     role_arn = var.DEPLOY_ROLE
   }
